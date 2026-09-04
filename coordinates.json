@@ -1,0 +1,98 @@
+[
+  {
+    "name": "R' Emanuel",
+    "address": "HaKablan 18/14",
+    "dotX": 2238.32,
+    "dotY": 1143.23,
+    "labelX": 1209.59,
+    "labelY": 467.56
+  },
+  {
+    "name": "R' Kovel",
+    "address": "Shaulzon 68/4",
+    "dotX": 1744.84,
+    "dotY": 3796.08,
+    "labelX": 323.4,
+    "labelY": 3842.5
+  },
+  {
+    "name": "Maslin",
+    "address": "Agassi 30",
+    "dotX": 2622.64,
+    "dotY": 4938.61,
+    "labelX": 3193.31,
+    "labelY": 4572.69
+  },
+  {
+    "name": "Simkins",
+    "address": "Agassi 26",
+    "dotX": 2400.64,
+    "dotY": 4736.48,
+    "labelX": 3054.72,
+    "labelY": 4279.23
+  },
+  {
+    "name": "Machon Yaakov",
+    "address": "Ibn Dnan 10",
+    "dotX": 1054.66,
+    "dotY": 5128.54,
+    "labelX": 321.22,
+    "labelY": 5476.4
+  },
+  {
+    "name": "R' Richman",
+    "address": "Shaulzon 40/16",
+    "dotX": 1195.21,
+    "dotY": 1966.81,
+    "labelX": 301.32,
+    "labelY": 1076.72
+  },
+  {
+    "name": "R' Y. Gershenfeld",
+    "address": "Shauzlon 8/5",
+    "dotX": 2673.11,
+    "dotY": 329.44,
+    "labelX": 1757.26,
+    "labelY": 145.96
+  },
+  {
+    "name": "R' S. Gershenfeld",
+    "address": "Ibn Denan 21/5",
+    "dotX": 2161.83,
+    "dotY": 5763.41,
+    "labelX": 2576.98,
+    "labelY": 6029.83
+  },
+  {
+    "name": "Hager",
+    "address": "Zerach Barnet 15/7 (5th floor)",
+    "dotX": 2746.43,
+    "dotY": 5337.57,
+    "labelX": 3436.39,
+    "labelY": 5398.44
+  },
+  {
+    "name": "Steinberg",
+    "address": "Shaulzon 50/14",
+    "dotX": 1714.89,
+    "dotY": 2529.66,
+    "labelX": 402.34,
+    "labelY": 3284.39
+  },
+  {
+    "name": "Shapiro",
+    "address": "Zerach Barnett 8a (4th floor)",
+    "dotX": 2292.56,
+    "dotY": 5158.9,
+    "labelX": 3168.17,
+    "labelY": 5727.77
+  },
+  {
+    "name": "Silver",
+    "address": "Parnas 6/12",
+    "dotX": 2002.7,
+    "dotY": 4026.65,
+    "labelX": 3023.85,
+    "labelY": 3928.76
+  }
+]

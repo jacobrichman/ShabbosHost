@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shabbos Host Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1F2A44;
+    --ink-soft:#3D4A66;
+    --paper:#F6F4EE;
+    --panel:#FFFFFF;
+    --line:#DDD8CA;
+    --gold:#B8862B;
+    --gold-soft:#EADFC4;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  header{
+    background:var(--ink);
+    color:#fff;
+    padding:22px 28px;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:26px;
+    margin:0;
+  }
+  header .sub{
+    font-size:13px;
+    color:#C7CCDB;
+    margin-top:2px;
+  }
+  main{
+    padding:24px 28px 60px;
+    max-width:1400px;
+    margin:0 auto;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    gap:22px;
+    align-items:start;
+  }
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;}
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px;
+  }
+  .panel h2{
+    font-family:'Fraunces',serif;
+    font-size:16px;
+    font-weight:600;
+    margin:0 0 12px;
+  }
+  button{ font-family:'Inter',sans-serif; cursor:pointer; }
+  .btn{
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:7px;
+    font-size:14px;
+    font-weight:600;
+  }
+  .btn:hover{background:var(--ink-soft);}
+  .btn.secondary{
+    background:#fff;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .btn.secondary:hover{border-color:var(--ink);}
+  .btn.small{ padding:5px 10px; font-size:12px; border-radius:6px; }
+  .select-actions{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .check-list{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    max-height:480px;
+    overflow-y:auto;
+  }
+  .check-row{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:8px;
+    border-radius:7px;
+  }
+  .check-row:hover{background:#F1EEE4;}
+  .check-row label{
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    flex:1;
+  }
+  .check-row input{
+    width:16px;height:16px;
+    accent-color:var(--gold);
+  }
+  .family-editor-panel{
+    margin-top:16px;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  .family-editor-panel.hidden{ display:none; }
+  .family-editor-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .family-editor-header h3{
+    margin:0;
+    font-size:14px;
+    font-weight:700;
+    font-family:'Fraunces',serif;
+  }
+  .family-editor-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .family-editor-row{
+    display:grid;
+    grid-template-columns: minmax(100px,1fr) minmax(150px,1.5fr) auto;
+    gap:8px;
+    align-items:center;
+  }
+  .family-editor-row input{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font:14px/1.3 'Inter',sans-serif;
+    background:#fff;
+    color:var(--ink);
+  }
+  .small-danger-btn{
+    border:1px solid #B33A3A;
+    background:#fff;
+    color:#B33A3A;
+    border-radius:6px;
+    padding:7px 9px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .small-danger-btn:hover{ background:#FDECEC; }
+  .canvas-wrap{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px;
+  }
+  canvas{
+    width:100%;
+    height:auto;
+    display:block;
+    border-radius:6px;
+  }
+  .export-actions{
+    margin-top:16px;
+  }
+  .floating-btns{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    display:flex;
+    gap:8px;
+    z-index:20;
+  }
+  .floating-edit-btn, .floating-json-btn{
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:50%;
+    background:var(--ink);
+    color:#fff;
+    font-size:22px;
+    line-height:1;
+    box-shadow:0 10px 18px rgba(31,42,68,0.18);
+    cursor:pointer;
+  }
+  .floating-edit-btn:hover, .floating-json-btn:hover{background:var(--ink-soft);}
+  .floating-json-btn{ font-size:18px; }
+  .coord-panel{
+    position:fixed;
+    right:18px;
+    bottom:70px;
+    width:min(420px, calc(100vw - 36px));
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 12px 30px rgba(31,42,68,0.15);
+    padding:12px;
+    z-index:18;
+  }
+  .coord-panel.hidden{ display:none; }
+  .coord-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:8px;
+    font-size:13px;
+    font-weight:600;
+  }
+  .coord-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .coord-panel textarea{
+    width:100%;
+    height:200px;
+    resize:vertical;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px;
+    font:12px/1.5 'SFMono-Regular', Consolas, monospace;
+  }
+  .small-btn{
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:#fff;
+    border-radius:7px;
+    padding:6px 10px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .small-btn.secondary{ background:#fff; color:var(--ink); }
+  #printArea{display:none;}
+  @media print{
+    @page {
+      size: A4 portrait;
+      margin: 12mm;
+    }
+    html, body {
+      height: auto;
+      overflow: visible;
+      background: #fff;
+      margin: 0;
+    }
+    body > *:not(#printArea) {
+      display: none !important;
+    }
+    #printArea {
+      display:block !important;
+      position: static;
+      width:100%;
+      margin:0;
+      padding:0;
+      overflow:visible;
+      text-align:center;
+    }
+    #printArea img{
+      display:block;
+      width:auto;
+      max-width:100%;
+      max-height: calc(100vh - 24mm);
+      height:auto;
+      margin:0 auto;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      object-fit: contain;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Shabbos Host Map</h1>
+  <div class="sub">Choose host families to include, then save as a PDF</div>
+</header>
+
+<main>
+  <div class="layout">
+    <div class="panel">
+      <h2 id="hostFamiliesTitle">Host families</h2>
+      <div id="selectActions" class="select-actions">
+        <button class="btn secondary small" id="selectAllBtn">Select all</button>
+        <button class="btn secondary small" id="clearAllBtn">Clear</button>
+      </div>
+      <div id="checkList" class="check-list"></div>
+      <div id="familyEditorPanel" class="family-editor-panel hidden">
+        <div class="family-editor-header">
+          <h3>Family details</h3>
+          <button class="btn secondary small" type="button" id="addFamilyBtn">Add family</button>
+        </div>
+        <div id="familyEditorList" class="family-editor-list"></div>
+      </div>
+      <div class="export-actions">
+        <button class="btn" id="exportPdfBtn" style="width:100%;">Save as PDF</button>
+      </div>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="mapCanvas" width="4756" height="6229"></canvas>
+    </div>
+  </div>
+</main>
+<div class="floating-btns">
+  <button id="jsonToggleBtn" class="floating-json-btn" type="button" aria-label="Show coordinates JSON">{ }</button>
+  <button id="editModeBtn" class="floating-edit-btn" type="button" aria-label="Edit coordinates">✎</button>
+</div>
+<div id="coordPanel" class="coord-panel hidden">
+  <div class="coord-header">
+    <span>Coordinates JSON</span>
+    <div class="coord-actions">
+      <button id="copyCoordBtn" class="small-btn secondary" type="button">Copy</button>
+    </div>
+  </div>
+  <textarea id="coordOutput" readonly></textarea>
+</div>
+<div id="printArea"><img id="printImg" alt="Host map"></div>
+
+<script>
+/* ============================================================
+   HARD-CODED CONFIG — replace with your real data/image later
+   ============================================================ */
+
+// To use a real map image, set this to a URL or a base64 data URI,
+// e.g. MAP_IMAGE_SRC = "data:image/png;base64,....";
+// Leave it as "" to keep the drawn sample placeholder below.
+const MAP_IMAGE_SRC = "./MAP.jpg";
+
+const COORDINATES_PATH = './coordinates.json';
+const FAMILIES = [];
+
+/* ============================================================ */
+
+let DESIGN_CANVAS_W = 1200, DESIGN_CANVAS_H = 800;
+let CANVAS_W = DESIGN_CANVAS_W, CANVAS_H = DESIGN_CANVAS_H;
+const OVERLAY_SIZE_MULTIPLIER = 4;
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+let mapImageObj = null;
+let selected = new Set();
+let editMode = false;
+let dragState = null;
+
+function loadMapImage(){
+  return new Promise((resolve) => {
+    if(!MAP_IMAGE_SRC){ resolve(); return; }
+    const img = new Image();
+    // Helps if MAP_IMAGE_SRC is a URL on a server that allows CORS.
+    // A base64 data URI (recommended) doesn't need this at all.
+    if(!MAP_IMAGE_SRC.startsWith('data:')) img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      mapImageObj = img;
+      DESIGN_CANVAS_W = img.naturalWidth;
+      DESIGN_CANVAS_H = img.naturalHeight;
+      CANVAS_W = img.naturalWidth;
+      CANVAS_H = img.naturalHeight;
+      canvas.width = CANVAS_W;
+      canvas.height = CANVAS_H;
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = MAP_IMAGE_SRC;
+  });
+}
+
+function drawBackground(){
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+  if(mapImageObj){
+    ctx.drawImage(mapImageObj, 0, 0, CANVAS_W, CANVAS_H);
+    return;
+  }
+  // sample placeholder map: light background + a few "streets" and "blocks"
+  ctx.fillStyle = '#EDEAE0';
+  ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+  ctx.strokeStyle = '#D7D2C2';
+  ctx.lineWidth = 1;
+  for(let x=0;x<=CANVAS_W;x+=50){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CANVAS_H); ctx.stroke(); }
+  for(let y=0;y<=CANVAS_H;y+=50){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CANVAS_W,y); ctx.stroke(); }
+  ctx.strokeStyle = '#C9C3AE';
+  ctx.lineWidth = 6;
+  [150, 500, 850].forEach(x => { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CANVAS_H); ctx.stroke(); });
+  [180, 420, 640].forEach(y => { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CANVAS_W,y); ctx.stroke(); });
+  ctx.fillStyle = '#B8B196';
+  ctx.font = '600 18px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Sample placeholder map — set MAP_IMAGE_SRC in the code to use your real one', CANVAS_W/2, CANVAS_H-24);
+}
+
+function getOverlayScale(){
+  return Math.min(CANVAS_W / DESIGN_CANVAS_W, CANVAS_H / DESIGN_CANVAS_H);
+}
+
+function getFamilyMetrics(fam){
+  const scale = getOverlayScale();
+  const dotX = fam.dotX * scale;
+  const dotY = fam.dotY * scale;
+  const labelX = fam.labelX * scale;
+  const labelY = fam.labelY * scale;
+  ctx.font = '600 ' + (16 * scale * OVERLAY_SIZE_MULTIPLIER) + 'px Inter, sans-serif';
+  const textWidth = ctx.measureText(fam.name).width;
+  const padX = 16 * scale * OVERLAY_SIZE_MULTIPLIER;
+  const boxW = textWidth + padX * 2;
+  const boxH = 34 * scale * OVERLAY_SIZE_MULTIPLIER;
+  const boxX = labelX - boxW / 2;
+  const boxY = labelY - boxH / 2;
+  const circleRadius = 12 * scale * OVERLAY_SIZE_MULTIPLIER;
+  return { dotX, dotY, labelX, labelY, boxX, boxY, boxW, boxH, circleRadius, scale };
+}
+
+function toDesignCoordinates(evt){
+  const rect = canvas.getBoundingClientRect();
+  const scale = getOverlayScale();
+  const x = (evt.clientX - rect.left) * (canvas.width / rect.width) / scale;
+  const y = (evt.clientY - rect.top) * (canvas.height / rect.height) / scale;
+  return { x: Math.max(0, Math.min(DESIGN_CANVAS_W, x)), y: Math.max(0, Math.min(DESIGN_CANVAS_H, y)) };
+}
+
+function selectAllForEdit(){
+  selected.clear();
+  FAMILIES.forEach(f => selected.add(f.name));
+  renderCheckList();
+}
+
+function updateEditModeButton(){
+  const btn = document.getElementById('editModeBtn');
+  const jsonBtn = document.getElementById('jsonToggleBtn');
+  btn.textContent = editMode ? '✓' : '✎';
+  btn.setAttribute('title', editMode ? 'Exit edit mode' : 'Edit coordinates');
+  btn.style.background = editMode ? '#1F2A44' : '#B8862B';
+  jsonBtn.style.display = editMode ? 'block' : 'none';
+}
+
+function roundCoordValue(value){
+  return Number(value.toFixed(2));
+}
+
+function showCoordinatesJSON(){
+  const output = document.getElementById('coordOutput');
+  const rounded = FAMILIES.map(f => ({
+    ...f,
+    dotX: roundCoordValue(f.dotX),
+    dotY: roundCoordValue(f.dotY),
+    labelX: roundCoordValue(f.labelX),
+    labelY: roundCoordValue(f.labelY)
+  }));
+  output.value = JSON.stringify(rounded, null, 2);
+}
+
+function roundRectPath(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+function rectLineIntersection(x0,y0,x1,y1, bx,by,bw,bh){
+  const dx = x0 - x1, dy = y0 - y1;
+  let tMin = 0, tMax = 1;
+  const edges = [
+    {p:-dx, q: x1 - bx},
+    {p: dx, q: (bx+bw) - x1},
+    {p:-dy, q: y1 - by},
+    {p: dy, q: (by+bh) - y1}
+  ];
+  for(const {p,q} of edges){
+    if(p === 0){ if(q < 0) return {x:x1,y:y1}; continue; }
+    const r = q/p;
+    if(p < 0){ if(r > tMax) return {x:x1,y:y1}; if(r > tMin) tMin = r; }
+    else { if(r < tMin) return {x:x1,y:y1}; if(r < tMax) tMax = r; }
+  }
+  return { x: x1 + tMin*dx, y: y1 + tMin*dy };
+}
+
+function drawArrow(x0,y0,x1,y1){
+  const overlayScale = Math.min(CANVAS_W / DESIGN_CANVAS_W, CANVAS_H / DESIGN_CANVAS_H);
+  ctx.beginPath();
+  ctx.moveTo(x0,y0);
+  ctx.lineTo(x1,y1);
+  ctx.strokeStyle = '#1F2A44';
+  ctx.lineWidth = 2.5 * overlayScale * OVERLAY_SIZE_MULTIPLIER;
+  ctx.stroke();
+  const angle = Math.atan2(y1-y0, x1-x0);
+  const headLen = 11 * overlayScale * OVERLAY_SIZE_MULTIPLIER;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x1 - headLen*Math.cos(angle - Math.PI/7), y1 - headLen*Math.sin(angle - Math.PI/7));
+  ctx.lineTo(x1 - headLen*Math.cos(angle + Math.PI/7), y1 - headLen*Math.sin(angle + Math.PI/7));
+  ctx.closePath();
+  ctx.fillStyle = '#1F2A44';
+  ctx.fill();
+}
+
+function wrapAddressLines(addressText, maxChars = 18){
+  if (!addressText) return [''];
+  const words = addressText.split(/\s+/).filter(Boolean);
+  if (!words.length) return [''];
+  const lines = [];
+  let current = words[0];
+  for (let i = 1; i < words.length; i++) {
+    const candidate = current + ' ' + words[i];
+    if (candidate.length <= maxChars) {
+      current = candidate;
+    } else {
+      lines.push(current);
+      current = words[i];
+    }
+  }
+  lines.push(current);
+  return lines;
+}
+
+function drawFamilyOverlay(fam){
+  const name = fam.name;
+  const address = fam.address || '';
+  const scale = getOverlayScale();
+  const sizeFactor = OVERLAY_SIZE_MULTIPLIER;
+
+  ctx.font = '600 ' + (16 * scale * sizeFactor) + 'px Inter, sans-serif';
+  const nameWidth = ctx.measureText(name).width;
+  const addressLines = wrapAddressLines(address, 18);
+  ctx.font = '500 ' + (11 * scale * sizeFactor) + 'px Inter, sans-serif';
+  const addressWidth = Math.max(...addressLines.map(line => ctx.measureText(line).width));
+  const textWidth = Math.max(nameWidth, addressWidth);
+  const padX = 14 * scale * sizeFactor;
+  const padY = 10 * scale * sizeFactor;
+  const boxW = Math.min(Math.max(textWidth + padX * 2, 90 * scale * sizeFactor), 210 * scale * sizeFactor);
+  const nameHeight = 16 * scale * sizeFactor * 1.2;
+  const addressHeight = addressLines.length ? (11 * scale * sizeFactor * 1.2 * addressLines.length) : 0;
+  const boxH = Math.max(34 * scale * sizeFactor, nameHeight + addressHeight + padY * 2 + 6 * scale * sizeFactor);
+
+  const labelX = fam.labelX * scale;
+  const labelY = fam.labelY * scale;
+  const boxX = labelX - boxW / 2;
+  const boxY = labelY - boxH / 2;
+
+  const dotX = fam.dotX * scale;
+  const dotY = fam.dotY * scale;
+  const circleRadius = 12 * scale * sizeFactor;
+
+  const dx = labelX - dotX;
+  const dy = labelY - dotY;
+  const lineLength = Math.hypot(dx, dy) || 1;
+  const arrowStart = {
+    x: dotX + (dx / lineLength) * circleRadius,
+    y: dotY + (dy / lineLength) * circleRadius
+  };
+  const arrowEnd = rectLineIntersection(arrowStart.x, arrowStart.y, labelX, labelY, boxX, boxY, boxW, boxH);
+  drawArrow(arrowStart.x, arrowStart.y, arrowEnd.x, arrowEnd.y);
+
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, circleRadius, 0, Math.PI*2);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2.5 * scale * sizeFactor;
+  ctx.stroke();
+
+  const r = 5 * scale * sizeFactor;
+  roundRectPath(boxX, boxY, boxW, boxH, r);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.lineWidth = 2 * scale * sizeFactor;
+  ctx.strokeStyle = '#000000';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(boxX+r, boxY+2*scale*sizeFactor);
+  ctx.lineTo(boxX+boxW-r, boxY+2*scale*sizeFactor);
+  ctx.moveTo(boxX+2*scale*sizeFactor, boxY+r);
+  ctx.lineTo(boxX+2*scale*sizeFactor, boxY+boxH-r);
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = 1.5 * scale * sizeFactor;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(boxX+r, boxY+boxH-2*scale*sizeFactor);
+  ctx.lineTo(boxX+boxW-r, boxY+boxH-2*scale*sizeFactor);
+  ctx.moveTo(boxX+boxW-2*scale*sizeFactor, boxY+r);
+  ctx.lineTo(boxX+boxW-2*scale*sizeFactor, boxY+boxH-r);
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx.lineWidth = 1.5 * scale * sizeFactor;
+  ctx.stroke();
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#000';
+  ctx.font = '600 ' + (16 * scale * sizeFactor) + 'px Inter, sans-serif';
+  const nameY = labelY - (addressLines.length ? (11 * scale * sizeFactor * 0.7) : 0);
+  ctx.fillText(name, labelX, nameY);
+
+  if (addressLines.length) {
+    ctx.fillStyle = '#6B7280';
+    ctx.font = '500 ' + (11 * scale * sizeFactor) + 'px Inter, sans-serif';
+    const addressStartY = nameY + (16 * scale * sizeFactor * 0.9);
+    const addressLineHeight = 11 * scale * sizeFactor * 1.25;
+    addressLines.forEach((line, index) => {
+      ctx.fillText(line, labelX, addressStartY + index * addressLineHeight);
+    });
+  }
+}
+
+function drawMap(){
+  drawBackground();
+  FAMILIES.filter(f => selected.has(f.name)).forEach(drawFamilyOverlay);
+}
+
+function renderCheckList(){
+  const list = document.getElementById('checkList');
+  list.innerHTML = '';
+  FAMILIES.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'check-row';
+    const id = 'chk-' + f.name.replace(/\s+/g,'-');
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = id;
+    input.checked = selected.has(f.name);
+    input.addEventListener('change', () => {
+      if (input.checked) selected.add(f.name); else selected.delete(f.name);
+      drawMap();
+    });
+    const label = document.createElement('label');
+    label.htmlFor = id;
+    label.textContent = f.name;
+    row.appendChild(input);
+    row.appendChild(label);
+    list.appendChild(row);
+  });
+}
+
+function renderFamilyEditor(){
+  const panel = document.getElementById('familyEditorPanel');
+  const list = document.getElementById('familyEditorList');
+  const checkList = document.getElementById('checkList');
+  const selectActions = document.getElementById('selectActions');
+  const title = document.getElementById('hostFamiliesTitle');
+  panel.classList.toggle('hidden', !editMode);
+  checkList.style.display = editMode ? 'none' : 'flex';
+  selectActions.style.display = editMode ? 'none' : 'flex';
+  title.style.display = editMode ? 'none' : 'block';
+  list.innerHTML = '';
+
+  if (!editMode) return;
+
+  FAMILIES.forEach((fam, index) => {
+    const row = document.createElement('div');
+    row.className = 'family-editor-row';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = fam.name;
+    nameInput.placeholder = 'Family name';
+    nameInput.addEventListener('change', (event) => {
+      const nextName = event.target.value.trim();
+      if (!nextName) {
+        event.target.value = fam.name;
+        return;
+      }
+      const previousName = fam.name;
+      fam.name = nextName;
+      if (selected.has(previousName)) {
+        selected.delete(previousName);
+        selected.add(nextName);
+      }
+      renderCheckList();
+      renderFamilyEditor();
+      drawMap();
+      showCoordinatesJSON();
+    });
+
+    const addressInput = document.createElement('input');
+    addressInput.type = 'text';
+    addressInput.value = fam.address || '';
+    addressInput.placeholder = 'Address';
+    addressInput.addEventListener('change', (event) => {
+      fam.address = event.target.value;
+      drawMap();
+      showCoordinatesJSON();
+    });
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'small-danger-btn';
+    deleteBtn.textContent = 'Remove';
+    deleteBtn.addEventListener('click', () => {
+      const removedName = fam.name;
+      FAMILIES.splice(index, 1);
+      if (selected.has(removedName)) selected.delete(removedName);
+      renderCheckList();
+      renderFamilyEditor();
+      drawMap();
+      showCoordinatesJSON();
+    });
+
+    row.appendChild(nameInput);
+    row.appendChild(addressInput);
+    row.appendChild(deleteBtn);
+    list.appendChild(row);
+  });
+}
+
+document.getElementById('selectAllBtn').addEventListener('click', () => {
+  FAMILIES.forEach(f => selected.add(f.name));
+  document.querySelectorAll('#checkList input[type=checkbox]').forEach(cb => cb.checked = true);
+  drawMap();
+});
+document.getElementById('clearAllBtn').addEventListener('click', () => {
+  selected.clear();
+  document.querySelectorAll('#checkList input[type=checkbox]').forEach(cb => cb.checked = false);
+  drawMap();
+});
+
+document.getElementById('exportPdfBtn').addEventListener('click', () => {
+  let dataUrl;
+  try{
+    dataUrl = canvas.toDataURL('image/png');
+  }catch(e){
+    alert('Could not export: the map image is loaded from a source that blocks this. Replace MAP_IMAGE_SRC with a base64 data URI of the image (instead of a plain URL) and this will work.');
+    return;
+  }
+
+  const img = document.getElementById('printImg');
+  img.onload = () => window.print();
+  img.src = dataUrl;
+});
+
+document.getElementById('jsonToggleBtn').addEventListener('click', () => {
+  const panel = document.getElementById('coordPanel');
+  const isHidden = panel.classList.contains('hidden');
+  if (isHidden) {
+    showCoordinatesJSON();
+    panel.classList.remove('hidden');
+  } else {
+    panel.classList.add('hidden');
+  }
+});
+
+document.getElementById('copyCoordBtn').addEventListener('click', async () => {
+  const output = document.getElementById('coordOutput');
+  try {
+    await navigator.clipboard.writeText(output.value);
+    const btn = document.getElementById('copyCoordBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = original, 1200);
+  } catch (err) {
+    output.focus();
+    output.select();
+  }
+});
+
+document.getElementById('editModeBtn').addEventListener('click', () => {
+  editMode = !editMode;
+  if (editMode) {
+    selectAllForEdit();
+    document.getElementById('coordPanel').classList.add('hidden');
+  } else {
+    document.getElementById('coordPanel').classList.add('hidden');
+  }
+  updateEditModeButton();
+  renderFamilyEditor();
+  drawMap();
+});
+
+document.getElementById('addFamilyBtn').addEventListener('click', () => {
+  const nextIndex = FAMILIES.length + 1;
+  const newFamily = {
+    name: `Family ${nextIndex}`,
+    address: `Address ${nextIndex}`,
+    dotX: 180 + (FAMILIES.length % 5) * 110,
+    dotY: 150 + (FAMILIES.length % 4) * 105,
+    labelX: 280 + (FAMILIES.length % 5) * 110,
+    labelY: 100 + (FAMILIES.length % 4) * 105
+  };
+  FAMILIES.push(newFamily);
+  selected.add(newFamily.name);
+  renderCheckList();
+  renderFamilyEditor();
+  drawMap();
+  showCoordinatesJSON();
+});
+
+canvas.addEventListener('pointerdown', (event) => {
+  if (!editMode) return;
+  const hit = (() => {
+    const p = toDesignCoordinates(event);
+    for (const fam of FAMILIES) {
+      const m = getFamilyMetrics(fam);
+      const dx = p.x - fam.dotX;
+      const dy = p.y - fam.dotY;
+      if (Math.hypot(dx, dy) <= m.circleRadius / getOverlayScale() + 12) {
+        return { fam, mode: 'dot' };
+      }
+      if (
+        p.x >= fam.labelX - (m.boxW / 2) &&
+        p.x <= fam.labelX + (m.boxW / 2) &&
+        p.y >= fam.labelY - (m.boxH / 2) &&
+        p.y <= fam.labelY + (m.boxH / 2)
+      ) {
+        return { fam, mode: 'label' };
+      }
+    }
+    return null;
+  })();
+
+  if (!hit) return;
+  dragState = { fam: hit.fam, mode: hit.mode };
+  canvas.setPointerCapture(event.pointerId);
+});
+
+canvas.addEventListener('pointermove', (event) => {
+  if (!dragState) return;
+  const p = toDesignCoordinates(event);
+  const fam = dragState.fam;
+  if (dragState.mode === 'dot') {
+    fam.dotX = Math.max(0, Math.min(DESIGN_CANVAS_W, p.x));
+    fam.dotY = Math.max(0, Math.min(DESIGN_CANVAS_H, p.y));
+  } else if (dragState.mode === 'label') {
+    fam.labelX = Math.max(0, Math.min(DESIGN_CANVAS_W, p.x));
+    fam.labelY = Math.max(0, Math.min(DESIGN_CANVAS_H, p.y));
+  }
+  drawMap();
+  showCoordinatesJSON();
+});
+
+canvas.addEventListener('pointerup', () => {
+  dragState = null;
+});
+
+canvas.addEventListener('pointerleave', () => {
+  dragState = null;
+});
+
+async function loadCoordinates(){
+  try {
+    const response = await fetch(COORDINATES_PATH);
+    if (!response.ok) throw new Error('No coordinates file');
+    const data = await response.json();
+    FAMILIES.length = 0;
+    data.forEach(item => FAMILIES.push({ ...item }));
+  } catch (err) {
+    FAMILIES.push(
+      { name: 'Cohen', address: '12 Maple St', dotX: 220, dotY: 180, labelX: 110, labelY: 90 },
+      { name: 'Levine', address: '45 Oak Ave', dotX: 430, dotY: 260, labelX: 430, labelY: 130 },
+      { name: 'Katz', address: '8 Birch Ln', dotX: 640, dotY: 210, labelX: 780, labelY: 110 },
+      { name: 'Friedman', address: '77 Cedar Rd', dotX: 300, dotY: 420, labelX: 130, labelY: 470 },
+      { name: 'Weiss', address: '19 Elm Ct', dotX: 560, dotY: 460, labelX: 560, labelY: 600 },
+      { name: 'Rosen', address: '3 Pine Way', dotX: 800, dotY: 400, labelX: 950, labelY: 470 },
+      { name: 'Berman', address: '26 Spruce Dr', dotX: 900, dotY: 250, labelX: 1050, labelY: 190 },
+      { name: 'Klein', address: '61 Willow Pl', dotX: 200, dotY: 620, labelX: 90, labelY: 690 }
+    );
+  }
+
+  selected.clear();
+  renderCheckList();
+  renderFamilyEditor();
+  drawMap();
+  updateEditModeButton();
+  showCoordinatesJSON();
+}
+
+(async function init(){
+  await loadMapImage();
+  await loadCoordinates();
+  document.getElementById('coordPanel').classList.add('hidden');
+  document.getElementById('jsonToggleBtn').style.display = 'none';
+  updateEditModeButton();
+})();
+</script>
+</body>
+</html>
